@@ -8,7 +8,8 @@ const HEIGHT = 720;
 const IMG_BACKGROUND = 0;
 const IMG_SHIP = 1;
 const IMG_MISSILE = 2;
-const IMG_ENEMY1 = 5;
+const IMG_ENEMY_MISSILE_1 = 4;
+const IMG_ENEMY_1 = 5;
 
 class Background {
   x = 0;
@@ -36,8 +37,8 @@ class GameObjectBase {
     const image = img[imageId]
     this.width = image.width;
     this.height = image.height;
-    this.centerX = Math.ceil(this.width / 2);
-    this.centerY = Math.ceil(this.height / 2);
+    // this.centerX = Math.ceil(this.width / 2);
+    // this.centerY = Math.ceil(this.height / 2);
   }
 }
 
@@ -68,7 +69,7 @@ class Ship extends GameObjectBase {
     if(key[40] > 0 && this.y < 680) this.y += this.yp;
     if(key[32] === 1) {
       key[32]++;
-      this.shootMissile();
+      this.shoot();
     }
     drawImgC(this.imageId, this.x, this.y);
     this.moveMissile();
@@ -83,16 +84,37 @@ class Ship extends GameObjectBase {
     this.missiles = this.missiles.filter((value, idx) => !(idx in removeMissileIndex));
   }
 
-  shootMissile() {
-    const missile = new Missile(this.x + 20, this.y, 40, 0);
+  shoot() {
+    const missile = new Missile(IMG_MISSILE, this.x + this.width, this.y, 40, 0);
     this.missiles.push(missile);
   }
 }
 
 
 class EnemyShip1 extends EnemyObject {
+  missiles = [];
   constructor(x, y) {
-    super(IMG_ENEMY1, x, y, -12, 0);
+    super(IMG_ENEMY_1, x, y, -12, 0);
+  }
+
+  move() {
+    const passed = super.move();
+    this.moveMissile();
+    return passed;
+  }
+
+  moveMissile() {
+    const removeIndex = [];
+    this.missiles.forEach((value, index) => {
+      const disabled = value.move();
+      if (disabled) removeIndex.push(index);
+    })
+    this.missiles = this.missiles.filter((value, index) => !(index in removeIndex));
+  }
+
+  shoot() {
+    const missile = new Missile(IMG_ENEMY_MISSILE_1, this.x, this.y, -24, 0)
+    this.missiles.push(missile);
   }
 }
 
@@ -117,7 +139,8 @@ function setup(){
   loadImg(IMG_BACKGROUND, "image/bg.png");
   loadImg(IMG_SHIP, "image/spaceship.png");
   loadImg(IMG_MISSILE, 'image/missile.png');
-  loadImg(IMG_ENEMY1, "image/enemy1.png");
+  loadImg(IMG_ENEMY_MISSILE_1, 'image/enemy0.png');
+  loadImg(IMG_ENEMY_1, "image/enemy1.png");
   background = new Background(1200, 1);
   ship = new Ship();
 }
@@ -130,8 +153,9 @@ function mainloop(){
   if (timer % 10 === 0) createEnemies();
   const removeEnemiesIdx = [];
   enemies.forEach((value, index) => {
-    const result = value.move();
-    if (result) removeEnemiesIdx.push(index);
+    const passed = value.move();
+    if (rnd(100) < 3) value.shoot();
+    if (passed) removeEnemiesIdx.push(index);
   });
   enemies = enemies.filter((value, index) => !(index in removeEnemiesIdx));
 }
