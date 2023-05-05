@@ -1,0 +1,14 @@
+{
+  "name": "tae-game-js",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:omitsuhashi/tae-game-js.git",
+  "author": "Osamu Mitsuhashi <osamu.mitsuhashi224@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "p5": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/p5": "^1.6.1"
+  }
+}
